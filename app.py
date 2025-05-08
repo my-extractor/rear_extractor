@@ -5,6 +5,7 @@ from moviepy.editor import VideoFileClip
 
 app = Flask(__name__)
 app.secret_key = "secret-key"
+
 UPLOAD_FOLDER = "uploads"
 ALLOWED_EXTENSIONS = {"mp4", "avi", "mov", "mkv", "ts"}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -25,11 +26,6 @@ def upload_file():
     file = request.files["file"]
     if file.filename == "":
         flash("No selected file")
-      
-    
-    
-      
-    
         return redirect(url_for("index"))
 
     if not allowed_file(file.filename):
@@ -42,24 +38,22 @@ def upload_file():
 
     try:
         clip = VideoFileClip(filepath)
-        rear_clip = clip  # 후방 영상 처리 가능하면 여기에 추가
-        rear_clip_path = os.path.splitext(filepath)[0] + "_rear.mp4"
-        rear_clip.write_videofile(
-    rear_clip_path,
-      
-    
-    
-      
-    
-    codec="libx264",
-    audio=False,
-    preset="ultrafast",
-    bitrate="500k"
-)
 
+        # 영상 처리 (여기서는 단순 복사, 필요 시 후방 추출 로직 추가)
+        rear_clip = clip
+        rear_clip_path = os.path.splitext(filepath)[0] + "_rear.mp4"
+
+        rear_clip.write_videofile(
+            rear_clip_path,
+            codec="libx264",
+            audio=False,
+            preset="ultrafast",
+            bitrate="500k",
+            verbose=False,
+            logger=None
+        )
 
         os.remove(filepath)  # 원본 삭제
-
         return send_file(rear_clip_path, as_attachment=True)
 
     except Exception as e:
