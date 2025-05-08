@@ -25,6 +25,11 @@ def upload_file():
     file = request.files["file"]
     if file.filename == "":
         flash("No selected file")
+      
+    
+    
+      
+    
         return redirect(url_for("index"))
 
     if not allowed_file(file.filename):
@@ -39,7 +44,19 @@ def upload_file():
         clip = VideoFileClip(filepath)
         rear_clip = clip  # 후방 영상 처리 가능하면 여기에 추가
         rear_clip_path = os.path.splitext(filepath)[0] + "_rear.mp4"
-        rear_clip.write_videofile(rear_clip_path, codec="libx264")
+        rear_clip.write_videofile(
+    rear_clip_path,
+      
+    
+    
+      
+    
+    codec="libx264",
+    audio=False,
+    preset="ultrafast",
+    bitrate="500k"
+)
+
 
         os.remove(filepath)  # 원본 삭제
 
