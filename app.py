@@ -1,7 +1,22 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, render_template
+      
+    
+    
+      
+    
 import os
 import uuid
+      
+    
+    
+      
+    
 from moviepy.editor import *
+      
+    
+    
+      
+    
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
@@ -9,7 +24,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route("/", methods=["GET"])
 def index():
-    return "Rear extractor is running."
+    return render_template("index.html")
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
