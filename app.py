@@ -1,7 +1,7 @@
 from flask import Flask, request, send_file
 import os
 import uuid
-import moviepy.editor as mp
+from moviepy.editor import *
 
 app = Flask(__name__)
 UPLOAD_FOLDER = "uploads"
