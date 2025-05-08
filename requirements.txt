@@ -1,0 +1,4 @@
+flask
+moviepy
+gunicorn
+ffmpeg-python
