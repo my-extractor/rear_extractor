@@ -1,26 +1,16 @@
-from flask import Flask, request, send_file, render_template
-      
-    
-    
-      
-    
+from flask import Flask, request, send_file, render_template, redirect, url_for, flash
 import os
 import uuid
-      
-    
-    
-      
-    
-from moviepy.editor import *
-      
-    
-    
-      
-    
+from moviepy.editor import VideoFileClip
 
 app = Flask(__name__)
+app.secret_key = "secret-key"
 UPLOAD_FOLDER = "uploads"
+ALLOWED_EXTENSIONS = {"mp4", "avi", "mov", "mkv", "ts"}
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/", methods=["GET"])
 def index():
@@ -28,22 +18,35 @@ def index():
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
+    if "file" not in request.files:
+        flash("No file part")
+        return redirect(url_for("index"))
+
     file = request.files["file"]
+    if file.filename == "":
+        flash("No selected file")
+        return redirect(url_for("index"))
+
+    if not allowed_file(file.filename):
+        flash("Unsupported file type.")
+        return redirect(url_for("index"))
+
     filename = f"{uuid.uuid4()}_{file.filename}"
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
 
-    clip = mp.VideoFileClip(filepath)
-    if len(clip.reader.infos["video_streams"]) < 2:
-        return "Error: No second stream found.", 400
+    try:
+        clip = VideoFileClip(filepath)
+        rear_clip = clip  # 후방 영상 처리 가능하면 여기에 추가
+        rear_clip_path = os.path.splitext(filepath)[0] + "_rear.mp4"
+        rear_clip.write_videofile(rear_clip_path, codec="libx264")
 
-    rear_clip = clip.fl(lambda gf, t: gf(t), apply_to=["mask"])
-    rear_clip_path = filepath.replace(".mp4", "_rear.mp4").replace(".avi", "_rear.mp4")
-    rear_clip.write_videofile(rear_clip_path, codec="libx264")
+        os.remove(filepath)  # 원본 삭제
 
-    os.remove(filepath)  # 원본 삭제
+        return send_file(rear_clip_path, as_attachment=True)
 
-    return send_file(rear_clip_path, as_attachment=True)
+    except Exception as e:
+        return f"Error processing video: {str(e)}", 500
 
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0", port=5000)
