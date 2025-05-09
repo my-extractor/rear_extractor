@@ -39,11 +39,12 @@ def upload_file():
     try:
         clip = VideoFileClip(filepath)
 
-        # 영상 처리 (여기서는 단순 복사, 필요 시 후방 추출 로직 추가)
-        rear_clip = clip
-        rear_clip_path = os.path.splitext(filepath)[0] + "_rear.mp4"
+        # 앞에서 10초만 잘라냄
+        duration = min(10, clip.duration)
+        short_clip = clip.subclip(0, duration)
 
-        rear_clip.write_videofile(
+        rear_clip_path = os.path.splitext(filepath)[0] + "_rear.mp4"
+        short_clip.write_videofile(
             rear_clip_path,
             codec="libx264",
             audio=False,
@@ -61,3 +62,4 @@ def upload_file():
 
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0", port=5000)
+
