@@ -37,24 +37,22 @@ def upload_file():
     file.save(filepath)
 
     try:
-        clip = VideoFileClip(filepath)
-
-        # 앞에서 10초만 잘라냄
-        duration = min(10, clip.duration)
-        short_clip = clip.subclip(0, duration)
-
+        clip = VideoFileClip(filepath).resize(height=360)
+        short_clip = clip.subclip(0, min(10, clip.duration))
         rear_clip_path = os.path.splitext(filepath)[0] + "_rear.mp4"
+
         short_clip.write_videofile(
             rear_clip_path,
             codec="libx264",
             audio=False,
             preset="ultrafast",
-            bitrate="500k",
+            bitrate="300k",
+            threads=1,
             verbose=False,
             logger=None
         )
 
-        os.remove(filepath)  # 원본 삭제
+        os.remove(filepath)
         return send_file(rear_clip_path, as_attachment=True)
 
     except Exception as e:
@@ -62,4 +60,3 @@ def upload_file():
 
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0", port=5000)
-
